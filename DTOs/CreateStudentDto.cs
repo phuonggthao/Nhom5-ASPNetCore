@@ -1,11 +1,9 @@
-namespace backend.Models
+namespace backend.Dtos
 {
-    public class Student
+    public class CreateStudentDto
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int ClassId { get; set; }
-        public Class? Class { get; set; }
     }
 }

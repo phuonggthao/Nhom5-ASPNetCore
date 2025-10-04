@@ -43,5 +43,6 @@ namespace backend.Controllers
 
             var classDto = _mapper.Map<ClassDto>(newClass);
             return CreatedAtAction(nameof(GetClasses), new { id = newClass.Id }, classDto);
+        }
     }
 }

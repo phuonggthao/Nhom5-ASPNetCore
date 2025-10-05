@@ -1,7 +1,7 @@
 using AutoMapper;
 using backend.Models;
 using backend.Dtos;
-using backend.Mappings;
+using backend.Profiles;
 
 namespace backend
 {

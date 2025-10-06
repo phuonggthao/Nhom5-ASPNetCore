@@ -8,10 +8,10 @@ namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClassesController : ControllerBase
+    public class ClassController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public ClassesController(AppDbContext context) => _context = context;
+        public ClassController(AppDbContext context) => _context = context;
 
         // GET /api/classes
         [HttpGet]

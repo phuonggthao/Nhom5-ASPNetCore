@@ -44,5 +44,27 @@ namespace backend.Controllers
             var classDto = _mapper.Map<ClassDto>(newClass);
             return CreatedAtAction(nameof(GetClasses), new { id = newClass.Id }, classDto);
         }
+
+        // GET /api/classes/{classId}/students
+        [HttpGet("{classId}/students")]
+        public async Task<ActionResult<IEnumerable<StudentDto>>> GetStudentsByClass(int classId)
+        {
+            var exists = await _context.Classes.AnyAsync(c => c.Id == classId);
+            if (!exists) return NotFound($"Class {classId} not found");
+
+            var students = await _context.Students
+                .Where(s => s.ClassId == classId)
+                .Include(s => s.Class)
+                .Select(s => new StudentDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    DateOfBirth = s.DateOfBirth,
+                    ClassName = s.Class != null ? s.Class.Name : string.Empty
+                })
+                .ToListAsync();
+
+            return Ok(students);
+        }
     }
 }

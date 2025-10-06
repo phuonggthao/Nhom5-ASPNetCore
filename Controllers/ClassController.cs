@@ -1,7 +1,7 @@
 using AutoMapper;
 using backend.Dtos;
 using backend.Models;
-using backend.Enity;
+using backend.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

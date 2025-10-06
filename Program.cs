@@ -1,6 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
-using backend.Enity;
+using backend.Entity;
 using AutoMapper;
 using backend;
 

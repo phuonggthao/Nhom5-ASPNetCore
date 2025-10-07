@@ -9,5 +9,10 @@ namespace backend.Entity
 
         public DbSet<Class> Classes { get; set; } = null!;
         public DbSet<Student> Students { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

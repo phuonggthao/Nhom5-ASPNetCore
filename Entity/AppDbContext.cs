@@ -7,9 +7,8 @@ namespace backend.Entity
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     
-        public DbSet<Class> Classes { get; set; }
-        public DbSet<Student> Students { get; set; }
-
+        public DbSet<Class> Classes { get; set; } = null!;
+public DbSet<Student> Students { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -19,6 +18,7 @@ namespace backend.Entity
                 new Class { Id = 1, Name = "Class A" },
                 new Class { Id = 2, Name = "Class B" }
             );
+
 
             // Seed data cho bảng Student
             modelBuilder.Entity<Student>().HasData(

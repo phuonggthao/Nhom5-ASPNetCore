@@ -27,6 +27,12 @@ namespace backend.Controllers
         {
             var classes = await _context.Classes
                 .Include(c => c.Students)
+                .Select(c => new ClassDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    StudentCount = c.Students.Count()
+                })
                 .ToListAsync();
 
             var classDtos = _mapper.Map<IEnumerable<ClassDto>>(classes);

@@ -19,22 +19,18 @@ namespace backend.Controllers
         {
             var classExists = await _context.Classes.AnyAsync(c => c.Id == dto.ClassId);
             if (!classExists) return NotFound($"ClassId {dto.ClassId} not found");
-
             var student = new Student
             {
                 Name = dto.Name,
                 DateOfBirth = dto.DateOfBirth,
                 ClassId = dto.ClassId
             };
-
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
-
             var className = await _context.Classes
                 .Where(c => c.Id == student.ClassId)
                 .Select(c => c.Name)
                 .FirstOrDefaultAsync() ?? string.Empty;
-
             var result = new StudentDto
             {
                 Id = student.Id,
@@ -69,18 +65,14 @@ namespace backend.Controllers
         {
             var student = await _context.Students.FindAsync(id);
             if (student == null) return NotFound($"Student {id} not found");
-
             student.Name = dto.Name;
             student.DateOfBirth = dto.DateOfBirth;
             // Không thay student.ClassId
-
             await _context.SaveChangesAsync();
-
             var className = await _context.Classes
                 .Where(c => c.Id == student.ClassId)
                 .Select(c => c.Name)
                 .FirstOrDefaultAsync() ?? string.Empty;
-
             var result = new StudentDto
             {
                 Id = student.Id,
@@ -88,7 +80,6 @@ namespace backend.Controllers
                 DateOfBirth = student.DateOfBirth,
                 ClassName = className
             };
-
             return Ok(result);
         }
 
@@ -98,12 +89,9 @@ namespace backend.Controllers
         {
             if (pageNumber <= 0) pageNumber = 1;
             if (pageSize <= 0) pageSize = 10;
-
             var query = _context.Students.Include(s => s.Class).OrderBy(s => s.Id);
-
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -115,7 +103,6 @@ namespace backend.Controllers
                     ClassName = s.Class != null ? s.Class.Name : string.Empty
                 })
                 .ToListAsync();
-
             var response = new
             {
                 TotalItems = totalItems,
@@ -124,7 +111,6 @@ namespace backend.Controllers
                 PageSize = pageSize,
                 Data = items
             };
-
             return Ok(response);
         }
     }

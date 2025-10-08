@@ -1,4 +1,10 @@
-CREATE DATABASE DdStudentClass;
+CREATE DATABASE DbStudentClass;
 GO
-USE DdStudentClass;
+USE DbStudentClass;
 GO
+
+DELETE FROM Students;
+DBCC CHECKIDENT ('Students', RESEED, 0);
+
+DELETE FROM Classes;
+DBCC CHECKIDENT ('Classes', RESEED, 0);

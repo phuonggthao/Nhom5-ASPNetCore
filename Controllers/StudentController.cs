@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using backend.Entity;
 using backend.Dtos;
 using backend.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -11,7 +12,13 @@ namespace backend.Controllers
     public class StudentController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public StudentController(AppDbContext context) => _context = context;
+        private readonly IMapper _mapper;
+
+        public StudentController(AppDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
         // POST /api/students
         [HttpPost]
@@ -19,25 +26,15 @@ namespace backend.Controllers
         {
             var classExists = await _context.Classes.AnyAsync(c => c.Id == dto.ClassId);
             if (!classExists) return NotFound($"ClassId {dto.ClassId} not found");
-            var student = new Student
-            {
-                Name = dto.Name,
-                DateOfBirth = dto.DateOfBirth,
-                ClassId = dto.ClassId
-            };
+
+            var student = _mapper.Map<Student>(dto);
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
-            var className = await _context.Classes
-                .Where(c => c.Id == student.ClassId)
-                .Select(c => c.Name)
-                .FirstOrDefaultAsync() ?? string.Empty;
-            var result = new StudentDto
-            {
-                Id = student.Id,
-                Name = student.Name,
-                DateOfBirth = student.DateOfBirth,
-                ClassName = className
-            };
+
+            // Load class name
+            await _context.Entry(student).Reference(s => s.Class).LoadAsync();
+
+            var result = _mapper.Map<StudentDto>(student);
             return CreatedAtAction(nameof(GetAllStudents), new { id = student.Id }, result);
         }
 
@@ -47,39 +44,26 @@ namespace backend.Controllers
         {
             var students = await _context.Students
                 .Include(s => s.Class)
-                .Select(s => new StudentDto
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    DateOfBirth = s.DateOfBirth,
-                    ClassName = s.Class != null ? s.Class.Name : string.Empty
-                })
                 .ToListAsync();
 
-            return Ok(students);
+            var result = _mapper.Map<IEnumerable<StudentDto>>(students);
+            return Ok(result);
         }
 
-        // PUT /api/students/{id}  (KHÔNG cho đổi lớp)
+        // PUT /api/students/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<StudentDto>> UpdateStudent(int id, [FromBody] UpdateStudentDto dto)
         {
-            var student = await _context.Students.FindAsync(id);
+            var student = await _context.Students.Include(s => s.Class).FirstOrDefaultAsync(s => s.Id == id);
             if (student == null) return NotFound($"Student {id} not found");
+
+            // Chỉ update Name, DateOfBirth — không đổi ClassId
             student.Name = dto.Name;
             student.DateOfBirth = dto.DateOfBirth;
-            // Không thay student.ClassId
+
             await _context.SaveChangesAsync();
-            var className = await _context.Classes
-                .Where(c => c.Id == student.ClassId)
-                .Select(c => c.Name)
-                .FirstOrDefaultAsync() ?? string.Empty;
-            var result = new StudentDto
-            {
-                Id = student.Id,
-                Name = student.Name,
-                DateOfBirth = student.DateOfBirth,
-                ClassName = className
-            };
+
+            var result = _mapper.Map<StudentDto>(student);
             return Ok(result);
         }
 
@@ -89,29 +73,30 @@ namespace backend.Controllers
         {
             if (pageNumber <= 0) pageNumber = 1;
             if (pageSize <= 0) pageSize = 10;
+
             var query = _context.Students.Include(s => s.Class).OrderBy(s => s.Id);
+
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            var items = await query
+
+            var students = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(s => new StudentDto
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    DateOfBirth = s.DateOfBirth,
-                    ClassName = s.Class != null ? s.Class.Name : string.Empty
-                })
                 .ToListAsync();
+
+            var studentDtos = _mapper.Map<IEnumerable<StudentDto>>(students);
+
             var response = new
             {
                 TotalItems = totalItems,
                 TotalPages = totalPages,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                Data = items
+                Data = studentDtos
             };
+
             return Ok(response);
         }
+
     }
 }

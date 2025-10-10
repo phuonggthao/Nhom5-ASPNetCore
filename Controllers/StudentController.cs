@@ -31,7 +31,6 @@ namespace backend.Controllers
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
-            // Load class name
             await _context.Entry(student).Reference(s => s.Class).LoadAsync();
 
             var result = _mapper.Map<StudentDto>(student);
@@ -57,7 +56,6 @@ namespace backend.Controllers
             var student = await _context.Students.Include(s => s.Class).FirstOrDefaultAsync(s => s.Id == id);
             if (student == null) return NotFound($"Student {id} not found");
 
-            // Chỉ update Name, DateOfBirth — không đổi ClassId
             student.Name = dto.Name;
             student.DateOfBirth = dto.DateOfBirth;
 
@@ -94,7 +92,6 @@ namespace backend.Controllers
                 PageSize = pageSize,
                 Data = studentDtos
             };
-
             return Ok(response);
         }
 

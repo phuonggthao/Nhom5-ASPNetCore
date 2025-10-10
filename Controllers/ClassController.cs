@@ -50,7 +50,7 @@ namespace backend.Controllers
             var classDto = _mapper.Map<ClassDto>(newClass);
             return CreatedAtAction(nameof(GetClasses), new { id = newClass.Id }, classDto);
         }
-        // GET /api/class/{classId}/student
+         // GET /api/classes/{classId}/students
         [HttpGet("{classId}/students")]
         public async Task<ActionResult<IEnumerable<StudentDto>>> GetStudentsByClass(int classId)
         {
@@ -60,16 +60,10 @@ namespace backend.Controllers
             var students = await _context.Students
                 .Where(s => s.ClassId == classId)
                 .Include(s => s.Class)
-                .Select(s => new StudentDto
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    DateOfBirth = s.DateOfBirth,
-                    ClassName = s.Class != null ? s.Class.Name : string.Empty
-                })
                 .ToListAsync();
 
-            return Ok(students);
+            var result = _mapper.Map<IEnumerable<StudentDto>>(students);
+            return Ok(result);
         }
     }
 }

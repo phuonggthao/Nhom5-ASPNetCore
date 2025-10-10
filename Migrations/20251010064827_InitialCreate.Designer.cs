@@ -12,7 +12,7 @@ using backend.Entity;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251007133414_InitialCreate")]
+    [Migration("20251010064827_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
